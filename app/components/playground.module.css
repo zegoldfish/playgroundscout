@@ -1,0 +1,346 @@
+/* Playground detail page styles */
+
+.page {
+  min-height: 100vh;
+  background-color: var(--color-blue-700);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Back navigation */
+.backNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-ice-100);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  margin-bottom: 12px;
+}
+
+.backNav:hover {
+  opacity: 0.8;
+}
+
+/* Page header with title and edit button */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-ice-100);
+  margin: 0;
+  flex: 1;
+  line-height: 1.2;
+  word-wrap: break-word;
+}
+
+/* Edit/Cancel button */
+.editButton {
+  padding: 10px 20px;
+  background-color: var(--color-green-700);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.editButton:hover {
+  background-color: var(--color-green-900);
+  transform: scale(1.03);
+}
+
+.editButtonCancel {
+  background-color: #6c757d;
+}
+
+.editButtonCancel:hover {
+  background-color: #5a6268;
+}
+
+/* Content panel */
+.contentPanel {
+  background-color: var(--color-ice-100);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* Section container */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Map container */
+.mapContainer {
+  width: 100%;
+  height: 320px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Amenity/Parking pill list */
+.pillList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  background-color: var(--color-blue-100);
+  color: var(--color-blue-900);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.pillAmenity {
+  background-color: var(--color-green-100);
+  color: var(--color-green-900);
+}
+
+.pillParking {
+  background-color: var(--color-amber-100);
+  color: var(--color-amber-900);
+}
+
+/* Empty state */
+.emptyState {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* OSM Tags section with collapsible details */
+.tagsDetails {
+  border: 1px solid var(--color-navy-100);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.tagsDetails summary {
+  padding: 12px 14px;
+  background-color: var(--color-navy-50);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text-primary);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tagsDetails summary:hover {
+  background-color: var(--color-navy-100);
+}
+
+.tagsDetails[open] summary {
+  background-color: var(--color-navy-100);
+  border-bottom: 1px solid var(--color-navy-100);
+}
+
+.tagsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 16px 14px;
+  background-color: white;
+}
+
+.tagEntry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tagKey {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-navy-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tagValue {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+/* Metadata section at bottom */
+.metadata {
+  padding-top: 20px;
+  border-top: 1px solid var(--color-navy-100);
+}
+
+.metadataGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  font-size: 0.85rem;
+}
+
+.metadataEntry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metadataLabel {
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metadataValue {
+  color: var(--text-primary);
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.metadataTimestamp {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+/* Rating section header */
+.ratingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Rating display container */
+.ratingDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background-color: var(--color-navy-50);
+  border-radius: 8px;
+}
+
+.ratingSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ratingLabel {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.notesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notesLabel {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.notesText {
+  margin: 0;
+  padding: 12px;
+  background-color: white;
+  border-radius: 6px;
+  border-left: 3px solid var(--color-blue-700);
+  color: var(--text-primary);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .page {
+    padding: 24px 16px;
+  }
+
+  .contentPanel {
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+
+  .editButton {
+    width: 100%;
+    text-align: center;
+  }
+
+  .tagsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .metadataGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pillList {
+    gap: 8px;
+  }
+
+  .pill {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+
+  .mapContainer {
+    height: 240px;
+  }
+}

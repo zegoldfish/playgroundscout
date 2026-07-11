@@ -1,0 +1,61 @@
+:root {
+	/* Navy scale */
+	--color-navy-900: #061a36;
+	--color-navy-700: #0a2c59; /* base */
+	--color-navy-500: #15457f;
+	--color-navy-300: #2d609c;
+	--color-navy-100: #d3ddec;
+	--color-navy-50: #e7eef5;
+
+	/* Blue scale */
+	--color-blue-900: #014a86;
+	--color-blue-700: #0597f2; /* base */
+	--color-blue-500: #2fa9f5;
+	--color-blue-300: #7ac9fb;
+	--color-blue-100: #c7e8ff;
+	--color-blue-50: #e5f4ff;
+
+	/* Ice / neutral */
+	--color-ice-900: #c6d3d6;
+	--color-ice-700: #d9e4e7;
+	--color-ice-500: #e9f1f2; /* base */
+	--color-ice-300: #f2f7f8;
+	--color-ice-100: #f7fbfc;
+	--color-ice-50: #fbfdfd;
+
+	/* Green scale */
+	--color-green-900: #024509;
+	--color-green-700: #078c03; /* base */
+	--color-green-500: #1ca71a;
+	--color-green-300: #5bcc55;
+	--color-green-100: #c7efc7;
+	--color-green-50: #e6f8e6;
+
+	/* Amber scale */
+	--color-amber-900: #5d3402;
+	--color-amber-700: #a65d03; /* base */
+	--color-amber-500: #c7791d;
+	--color-amber-300: #dda259;
+	--color-amber-100: #f2d6ab;
+	--color-amber-50: #f9ead1;
+
+	--text-primary: var(--color-navy-700);
+	--text-secondary: var(--color-navy-500);
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family: var(--font-roboto), system-ui, -apple-system, sans-serif;
+	background: var(--color-blue-700);
+	color: var(--text-primary);
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
