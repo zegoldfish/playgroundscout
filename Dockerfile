@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json* ./
 RUN npm ci
-
+RUN mkdir -p public
 COPY . .
 RUN npm run build
 
@@ -19,7 +19,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 
 COPY --from=builder /app/.next ./.next
-COPY public ./public
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 
