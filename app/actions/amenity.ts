@@ -1,5 +1,6 @@
 "use server";
 
+import { getServerSession } from "next-auth/next";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { 
 	DynamoDBDocumentClient, 
@@ -8,6 +9,7 @@ import {
 	DeleteCommand, 
 	ScanCommand 
 } from "@aws-sdk/lib-dynamodb";
+import { authOptions } from "@/app/auth";
 import { Amenity, CreateAmenity, UpdateAmenity } from "@/app/schemas/amenity";
 
 const client = new DynamoDBClient({});
@@ -17,6 +19,11 @@ const AMENITIES_TABLE = "amenities";
 
 // Create Amenity
 export async function createAmenity(data: CreateAmenity): Promise<Amenity> {
+	const session = await getServerSession(authOptions);
+	if (!session) {
+		throw new Error("Authentication required");
+	}
+
 	// Check for duplicates
 	const existingAmenities = await listAmenities();
 	const duplicate = existingAmenities.find(
@@ -80,6 +87,11 @@ export async function updateAmenity(data: UpdateAmenity): Promise<Amenity | null
 
 // Delete Amenity
 export async function deleteAmenity(amenity_id: string): Promise<boolean> {
+	const session = await getServerSession(authOptions);
+	if (!session) {
+		throw new Error("Authentication required");
+	}
+
 	await docClient.send(
 		new DeleteCommand({
 			TableName: AMENITIES_TABLE,

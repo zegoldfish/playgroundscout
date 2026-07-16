@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { listAmenities, deleteAmenity } from "@/app/actions/amenity";
 import { amenityNameToDisplay } from "@/app/utils/amenityDisplay";
 import AmenityCreateForm from "@/app/components/AmenityCreateForm";
@@ -15,6 +17,8 @@ import {
   Box,
   CircularProgress,
   Stack,
+  Alert,
+  Button,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -25,6 +29,7 @@ interface AmenityPageClientProps {
 export default function AmenityPageClient({
   initialAmenities,
 }: AmenityPageClientProps) {
+  const { data: session } = useSession();
   const [amenities, setAmenities] = useState<Amenity[]>(initialAmenities);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -65,53 +70,73 @@ export default function AmenityPageClient({
           Amenities
         </Typography>
 
-        <AmenityCreateForm onSuccess={loadAmenities} />
+        {!session?.user ? (
+          <Alert
+            severity="info"
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                component={Link}
+                href="/auth/signin"
+              >
+                Sign In
+              </Button>
+            }
+          >
+            Sign in to manage amenities
+          </Alert>
+        ) : (
+          <>
+            <AmenityCreateForm onSuccess={loadAmenities} />
 
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
-            Existing Amenities
-          </Typography>
-          {isLoading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : amenities.length === 0 ? (
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              No amenities found.
-            </Typography>
-          ) : (
-            <List>
-              {amenities.map((amenity) => (
-                <ListItem
-                  key={amenity.amenity_id}
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => handleDelete(amenity.amenity_id)}
-                      disabled={deletingId === amenity.amenity_id}
-                      color="error"
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
+                Existing Amenities
+              </Typography>
+              {isLoading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : amenities.length === 0 ? (
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  No amenities found.
+                </Typography>
+              ) : (
+                <List>
+                  {amenities.map((amenity) => (
+                    <ListItem
+                      key={amenity.amenity_id}
+                      secondaryAction={
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => handleDelete(amenity.amenity_id)}
+                          disabled={deletingId === amenity.amenity_id}
+                          color="error"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      }
+                      sx={{
+                        bgcolor: "background.paper",
+                        borderRadius: 1,
+                        mb: 1,
+                        border: "1px solid",
+                        borderColor: "divider",
+                      }}
                     >
-                      <DeleteIcon />
-                    </IconButton>
-                  }
-                  sx={{
-                    bgcolor: "background.paper",
-                    borderRadius: 1,
-                    mb: 1,
-                    border: "1px solid",
-                    borderColor: "divider",
-                  }}
-                >
-                  <ListItemText
-                    primary={amenityNameToDisplay(amenity.name)}
-                    secondary={`ID: ${amenity.amenity_id}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </Box>
+                      <ListItemText
+                        primary={amenityNameToDisplay(amenity.name)}
+                        secondary={`ID: ${amenity.amenity_id}`}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </Box>
+          </>
+        )}
       </Stack>
     </Container>
   );

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import PlaygroundEditForm from "@/app/components/PlaygroundEditForm";
 import Playground from "@/app/components/Playground";
 import { Playground as PlaygroundType } from "@/app/schemas/playground";
@@ -12,6 +13,7 @@ interface PlaygroundToggleProps {
 }
 
 export default function PlaygroundToggle({ playground }: PlaygroundToggleProps) {
+  const { data: session } = useSession();
   const [isEditing, setIsEditing] = useState(false);
 
   return (
@@ -54,15 +56,17 @@ export default function PlaygroundToggle({ playground }: PlaygroundToggleProps) 
             <Typography variant="h2" sx={{ flex: 1, fontWeight: 700 }}>
               {playground.name}
             </Typography>
-            <Button
-              onClick={() => setIsEditing(true)}
-              variant="contained"
-              color="success"
-              size="large"
-              sx={{ flexShrink: 0 }}
-            >
-              Edit
-            </Button>
+            {session?.user && (
+              <Button
+                onClick={() => setIsEditing(true)}
+                variant="contained"
+                color="success"
+                size="large"
+                sx={{ flexShrink: 0 }}
+              >
+                Edit
+              </Button>
+            )}
           </Box>
         )}
 

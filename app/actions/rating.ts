@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth/next";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { authOptions } from "@/app/auth";
 import { RatingRecord } from "@/app/schemas/rating";
 import { updatePlayground } from "@/app/actions/playground";
 
@@ -55,6 +57,11 @@ export async function saveUserRating(
     notes?: string;
   }
 ): Promise<{ success: boolean; error?: string }> {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return { success: false, error: "Authentication required" };
+  }
+
   try {
     const now = new Date().toISOString();
     

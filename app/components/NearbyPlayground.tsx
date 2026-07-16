@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { usePlaygroundExists } from "@/app/hooks/usePlaygroundExists";
 import { savePlayground } from "@/app/actions/playground";
 import { listAmenities } from "@/app/actions/amenity";
@@ -83,6 +84,7 @@ function getTagChips(tags: Record<string, string> | undefined): Array<{
 }
 
 export default function NearbyPlayground({ playground }: PlaygroundProps) {
+  const { data: session } = useSession();
   const {
     exists,
     loading,
@@ -289,6 +291,16 @@ export default function NearbyPlayground({ playground }: PlaygroundProps) {
           <Typography variant="body2" sx={{ color: "text.secondary", flex: 1 }}>
             Loading...
           </Typography>
+        ) : !session?.user ? (
+          <Button
+            component={Link}
+            href="/auth/signin"
+            variant="contained"
+            size="small"
+            fullWidth
+          >
+            Sign in to save
+          </Button>
         ) : exists === false ? (
           <Button
             onClick={handleSave}

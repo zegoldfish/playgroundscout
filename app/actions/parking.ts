@@ -1,5 +1,6 @@
 "use server";
 
+import { getServerSession } from "next-auth/next";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { 
 	DynamoDBDocumentClient, 
@@ -8,6 +9,7 @@ import {
 	DeleteCommand, 
 	ScanCommand 
 } from "@aws-sdk/lib-dynamodb";
+import { authOptions } from "@/app/auth";
 import { Parking, CreateParking, UpdateParking } from "@/app/schemas/parking";
 
 const client = new DynamoDBClient({});
@@ -17,6 +19,11 @@ const PARKINGS_TABLE = "parkings";
 
 // Create Parking
 export async function createParking(data: CreateParking): Promise<Parking> {
+	const session = await getServerSession(authOptions);
+	if (!session) {
+		throw new Error("Authentication required");
+	}
+
 	// Check for duplicates
 	const existingParkings = await listParkings();
 	const duplicate = existingParkings.find(
@@ -80,6 +87,11 @@ export async function updateParking(data: UpdateParking): Promise<Parking | null
 
 // Delete Parking
 export async function deleteParking(parking_id: string): Promise<boolean> {
+	const session = await getServerSession(authOptions);
+	if (!session) {
+		throw new Error("Authentication required");
+	}
+
 	await docClient.send(
 		new DeleteCommand({
 			TableName: PARKINGS_TABLE,

@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth/next";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { encode as encodeGeohash } from "ngeohash";
+import { authOptions } from "@/app/auth";
 import { CreatePlayground, Playground } from "@/app/schemas/playground";
 
 const client = new DynamoDBClient({});
@@ -80,6 +82,11 @@ export async function savePlayground(data: {
   longitude: number;
   tags?: Record<string, string>;
 }): Promise<{ success: boolean; error?: string }> {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return { success: false, error: "Authentication required" };
+  }
+
   try {
     const now = new Date().toISOString();
     const osmId = String(data.osm_id);
@@ -129,6 +136,11 @@ export async function updatePlayground(
     rating_count: number;
   }>
 ): Promise<{ success: boolean; error?: string }> {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    return { success: false, error: "Authentication required" };
+  }
+
   try {
     const updateFields: Record<string, string | number | string[] | boolean> = {};
     const expressionAttributeNames: Record<string, string> = {};
