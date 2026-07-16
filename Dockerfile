@@ -4,9 +4,8 @@ WORKDIR /app
 
 COPY package.json package-lock.json* ./
 RUN npm ci
-
-COPY . .
 RUN mkdir -p public
+COPY . .
 RUN npm run build
 
 # Runtime stage: only production deps and build output
