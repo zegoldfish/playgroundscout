@@ -161,6 +161,7 @@ export default function NearbyPlayground({ playground }: PlaygroundProps) {
     <Card
       sx={{
         height: "100%",
+        width: "100%",
         display: "flex",
         flexDirection: "column",
         borderRadius: 2,
