@@ -2,32 +2,56 @@
 
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import styles from "./authStatus.module.css";
+import { Box, Button, Typography, CircularProgress } from "@mui/material";
 
 export default function AuthStatus() {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <div className={styles.status}>Loading...</div>;
+    return <CircularProgress size={24} />;
   }
 
   return (
-    <div className={styles.container}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
       {session?.user ? (
-        <div className={styles.userMenu}>
-          <span className={styles.userName}>{session.user.name || session.user.email}</span>
-          <button
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="body2" sx={{ color: "white", fontWeight: 500 }}>
+            {session.user.name || session.user.email}
+          </Typography>
+          <Button
             onClick={() => signOut({ redirect: true })}
-            className={styles.signOutButton}
+            variant="outlined"
+            size="small"
+            sx={{
+              color: "white",
+              borderColor: "white",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                borderColor: "white",
+              },
+            }}
           >
             Sign Out
-          </button>
-        </div>
+          </Button>
+        </Box>
       ) : (
-        <Link href="/auth/signin" className={styles.signInLink}>
+        <Button
+          component={Link}
+          href="/auth/signin"
+          variant="contained"
+          size="small"
+          sx={{
+            backgroundColor: "white",
+            color: "primary.main",
+            fontWeight: 600,
+            "&:hover": {
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+            },
+          }}
+        >
           Sign In
-        </Link>
+        </Button>
       )}
-    </div>
+    </Box>
   );
 }

@@ -3,98 +3,98 @@
 import { useGeolocation } from "@/app/hooks/useGeolocation";
 import { useNearbyPlaygrounds } from "@/app/hooks/useNearbyPlaygrounds";
 import Playground from "./NearbyPlayground";
-import styles from "@/app/page.module.css";
+import {
+  Box,
+  CircularProgress,
+  Alert,
+  List,
+  Pagination,
+  Stack,
+  Typography,
+} from "@mui/material";
 
 export default function NearbyPlaygrounds() {
   const geo = useGeolocation();
-  const { playgrounds, loading, error, currentPage, totalPages, setCurrentPage, allPlaygroundsCount } = useNearbyPlaygrounds(geo);
+  const {
+    playgrounds,
+    loading,
+    error,
+    currentPage,
+    totalPages,
+    setCurrentPage,
+    allPlaygroundsCount,
+  } = useNearbyPlaygrounds(geo);
 
   // Location status
   if (geo.status === "loading" || geo.status === "idle") {
     return (
-      <div className={styles.emptyState}>
-        <p className={styles.emptyStateMessage}>Waiting for location access...</p>
-      </div>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
   if (geo.status === "error") {
     return (
-      <div className={styles.emptyState}>
-        <p className={styles.emptyStateTitle}>Location Required</p>
-        <p className={styles.emptyStateMessage}>{geo.error}</p>
-      </div>
+      <Alert severity="error" sx={{ mb: 2 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+          Location Required
+        </Typography>
+        <Typography variant="body2">{geo.error}</Typography>
+      </Alert>
     );
   }
 
   // Playground results
   if (loading) {
     return (
-      <div className={styles.emptyState}>
-        <p className={styles.emptyStateMessage}>Loading playgrounds near you...</p>
-      </div>
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.emptyState}>
-        <p className={styles.emptyStateTitle}>Error Loading Playgrounds</p>
-        <p className={styles.emptyStateMessage}>{error}</p>
-      </div>
+      <Alert severity="error">
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+          Error Loading Playgrounds
+        </Typography>
+        <Typography variant="body2">{error}</Typography>
+      </Alert>
     );
   }
 
   if (playgrounds.length === 0) {
     return (
-      <div className={styles.emptyState}>
-        <p className={styles.emptyStateMessage}>No playgrounds found nearby.</p>
-      </div>
+      <Alert severity="info">No playgrounds found nearby.</Alert>
     );
   }
 
   return (
-    <div>
-      <ul className={styles.list}>
+    <Box>
+      <List sx={{ display: "flex", flexDirection: "column", gap: 2, p: 0 }}>
         {playgrounds.map((playground) => (
           <Playground key={playground.id} playground={playground} />
         ))}
-      </ul>
+      </List>
+
       {totalPages > 1 && (
-        <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginTop: "20px", alignItems: "center" }}>
-          <button
-            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            style={{
-              padding: "8px 12px",
-              backgroundColor: currentPage === 1 ? "#ccc" : "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: currentPage === 1 ? "default" : "pointer",
-            }}
-          >
-            Previous
-          </button>
-          <span style={{ margin: "0 10px", fontSize: "14px" }}>
-            Page {currentPage} of {totalPages} ({allPlaygroundsCount} total)
-          </span>
-          <button
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-            disabled={currentPage === totalPages}
-            style={{
-              padding: "8px 12px",
-              backgroundColor: currentPage === totalPages ? "#ccc" : "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: currentPage === totalPages ? "default" : "pointer",
-            }}
-          >
-            Next
-          </button>
-        </div>
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Stack spacing={2} alignItems="center">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(_, page) => setCurrentPage(page)}
+              color="primary"
+              size="large"
+            />
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              Page {currentPage} of {totalPages} ({allPlaygroundsCount} total)
+            </Typography>
+          </Stack>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }

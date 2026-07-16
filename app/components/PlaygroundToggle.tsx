@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState } from "react";
+import Link from "next/link";
 import PlaygroundEditForm from "@/app/components/PlaygroundEditForm";
 import Playground from "@/app/components/Playground";
 import { Playground as PlaygroundType } from "@/app/schemas/playground";
-import styles from "./playground.module.css";
+import { Container, Box, Button, Typography, Stack } from "@mui/material";
 
 interface PlaygroundToggleProps {
   playground: PlaygroundType;
@@ -15,34 +15,68 @@ export default function PlaygroundToggle({ playground }: PlaygroundToggleProps) 
   const [isEditing, setIsEditing] = useState(false);
 
   return (
-    <div className={styles.page}>
-      <div className={styles.container}>
-        <Link href="/" className={styles.backNav}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #f0f7ff 0%, #e5f4ff 100%)",
+        py: 4,
+      }}
+    >
+      <Container maxWidth="md">
+        {/* Back Button */}
+        <Button
+          component={Link}
+          href="/"
+          variant="text"
+          sx={{
+            mb: 2,
+            color: "primary.main",
+            fontWeight: 500,
+            "&:hover": {
+              opacity: 0.8,
+            },
+          }}
+        >
           ← Back
-        </Link>
+        </Button>
 
+        {/* Page Header */}
         {!isEditing && (
-          <div className={styles.pageHeader}>
-            <h1 className={styles.pageTitle}>{playground.name}</h1>
-            <button
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 2,
+              mb: 4,
+            }}
+          >
+            <Typography variant="h2" sx={{ flex: 1, fontWeight: 700 }}>
+              {playground.name}
+            </Typography>
+            <Button
               onClick={() => setIsEditing(true)}
-              className={styles.editButton}
+              variant="contained"
+              color="success"
+              size="large"
+              sx={{ flexShrink: 0 }}
             >
               Edit
-            </button>
-          </div>
+            </Button>
+          </Box>
         )}
 
+        {/* Content */}
         {isEditing ? (
-          <PlaygroundEditForm 
-            playground={playground} 
+          <PlaygroundEditForm
+            playground={playground}
             onSuccess={() => setIsEditing(false)}
             onCancel={() => setIsEditing(false)}
           />
         ) : (
           <Playground playground={playground} />
         )}
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 }

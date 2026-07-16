@@ -1,5 +1,7 @@
 "use client";
 
+import { Rating, Box, Typography, Stack } from "@mui/material";
+
 interface RatingDisplayProps {
   rating?: number;
   count?: number;
@@ -13,37 +15,52 @@ export default function RatingDisplay({
   userRating,
   size = "large",
 }: RatingDisplayProps) {
-  const sizeClass = size === "small" ? "text-sm" : "text-lg";
+  const ratingSize = size === "small" ? 20 : 28;
+  const textVariant = size === "small" ? "body2" : "body1";
 
   return (
-    <div className={`flex flex-col gap-2 ${sizeClass}`}>
+    <Stack spacing={1}>
       {/* Average rating */}
       {rating ? (
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1">
-            {Array.from({ length: 5 }, (_, i) =>
-              i < Math.floor(rating) ? "⭐" : "☆"
-            ).join("")}
-          </span>
-          <span className="font-semibold">{rating}/5</span>
-          <span className="text-xs opacity-70">({count} {count === 1 ? "rating" : "ratings"})</span>
-        </div>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Rating value={rating} readOnly size={size === "small" ? "small" : "medium"} />
+          <Typography variant={textVariant} sx={{ fontWeight: 600 }}>
+            {rating}/5
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{ color: "text.secondary", opacity: 0.7 }}
+          >
+            ({count} {count === 1 ? "rating" : "ratings"})
+          </Typography>
+        </Box>
       ) : (
-        <span className="text-gray-400">No ratings yet</span>
+        <Typography variant={textVariant} sx={{ color: "text.secondary" }}>
+          No ratings yet
+        </Typography>
       )}
 
       {/* User's personal rating */}
       {userRating && (
-        <div className="flex items-center gap-2 text-sm border-t pt-2">
-          <span className="text-xs font-semibold text-gray-600">Your rating:</span>
-          <span className="flex items-center gap-1">
-            {Array.from({ length: 5 }, (_, i) =>
-              i < userRating ? "⭐" : "☆"
-            ).join("")}
-          </span>
-          <span className="font-semibold">{userRating}/5</span>
-        </div>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            borderTop: "1px solid",
+            borderColor: "divider",
+            pt: 1,
+          }}
+        >
+          <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+            Your rating:
+          </Typography>
+          <Rating value={userRating} readOnly size="small" />
+          <Typography variant="caption" sx={{ fontWeight: 600 }}>
+            {userRating}/5
+          </Typography>
+        </Box>
       )}
-    </div>
+    </Stack>
   );
 }

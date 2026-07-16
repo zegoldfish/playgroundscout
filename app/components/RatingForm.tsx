@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import { saveUserRating } from "@/app/actions/rating";
-import styles from "./ratingForm.module.css";
+import {
+  Box,
+  Rating,
+  TextField,
+  Button,
+  Alert,
+  Stack,
+  Typography,
+  LinearProgress,
+  Paper,
+} from "@mui/material";
 
 interface RatingFormProps {
   playgroundId: string;
@@ -66,96 +76,129 @@ export default function RatingForm({
   const notesPercentage = (notesLength / maxNotes) * 100;
 
   return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      {/* Star Rating Section */}
-      <div className={styles.ratingSection}>
-        <label className={styles.label}>How would you rate this playground?</label>
-        <div className={styles.starContainer}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              type="button"
-              onClick={() => setRating(rating === star ? 0 : star)}
-              className={`${styles.starButton} ${star <= rating ? styles.starActive : styles.starInactive}`}
-              title={`${star} star${star > 1 ? "s" : ""}`}
-              aria-label={`Rate ${star} stars`}
+    <Paper
+      component="form"
+      onSubmit={handleSubmit}
+      elevation={1}
+      sx={{
+        p: 3,
+        background: "linear-gradient(135deg, #f5f7ff 0%, #f0f7ff 100%)",
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "primary.light",
+      }}
+    >
+      <Stack spacing={3}>
+        {/* Rating Section */}
+        <Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
+            How would you rate this playground?
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Rating
+              value={rating}
+              onChange={(_, newValue) => setRating(newValue || 0)}
+              size="large"
+              sx={{ fontSize: "2.5rem" }}
+            />
+            {rating > 0 && (
+              <Typography variant="h6" sx={{ fontWeight: 600, color: "primary.main" }}>
+                {rating}/5
+              </Typography>
+            )}
+          </Box>
+        </Box>
+
+        {/* Notes Section */}
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Share your experience
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                color: notesPercentage > 80 ? "warning.main" : "text.secondary",
+              }}
             >
-              {star <= rating ? "⭐" : "☆"}
-            </button>
-          ))}
-          {rating > 0 && <span className={styles.ratingText}>{rating}/5</span>}
-        </div>
-      </div>
+              {notesLength}/{maxNotes}
+            </Typography>
+          </Box>
+          <TextField
+            fullWidth
+            multiline
+            rows={5}
+            value={notes}
+            onChange={(e) => {
+              if (e.target.value.length <= maxNotes) {
+                setNotes(e.target.value);
+              }
+            }}
+            placeholder="What did you think? Is it good for your kids? Any tips for other parents? ✨"
+            inputProps={{ maxLength: maxNotes }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 1.5,
+              },
+            }}
+          />
+          <Box sx={{ mt: 1 }}>
+            <LinearProgress
+              variant="determinate"
+              value={Math.min(notesPercentage, 100)}
+              sx={{
+                height: 6,
+                borderRadius: 1,
+                backgroundColor: "#e0e0e0",
+                "& .MuiLinearProgress-bar": {
+                  backgroundColor:
+                    notesPercentage > 80 ? "warning.main" : "primary.main",
+                },
+              }}
+            />
+          </Box>
+        </Box>
 
-      {/* Notes Section */}
-      <div className={styles.notesSection}>
-        <div className={styles.notesHeader}>
-          <label htmlFor="notes" className={styles.label}>
-            Share your experience
-          </label>
-          <span className={`${styles.charCount} ${notesPercentage > 80 ? styles.charCountWarning : ""}`}>
-            {notesLength}/{maxNotes}
-          </span>
-        </div>
-        <textarea
-          id="notes"
-          value={notes}
-          onChange={(e) => {
-            if (e.target.value.length <= maxNotes) {
-              setNotes(e.target.value);
-            }
-          }}
-          placeholder="What did you think? Is it good for your kids? Any tips for other parents? ✨"
-          className={styles.textarea}
-          rows={5}
-          maxLength={maxNotes}
-        />
-        <div className={styles.progressBar}>
-          <div className={styles.progressFill} style={{ width: `${notesPercentage}%` }} />
-        </div>
-      </div>
+        {/* Messages */}
+        {error && (
+          <Alert severity="error" onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
 
-      {/* Messages */}
-      {error && (
-        <div className={styles.errorBox}>
-          <span className={styles.errorIcon}>⚠️</span>
-          <span>{error}</span>
-        </div>
-      )}
+        {success && (
+          <Alert severity="success" onClose={() => setSuccess(false)}>
+            Rating and notes saved!
+          </Alert>
+        )}
 
-      {success && (
-        <div className={styles.successBox}>
-          <span className={styles.successIcon}>✓</span>
-          <span>Rating and notes saved!</span>
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className={styles.actions}>
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={saving}
-          className={styles.cancelButton}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={saving}
-          className={styles.saveButton}
-        >
-          {saving ? (
-            <>
-              <span className={styles.spinner}>⏳</span> Saving...
-            </>
-          ) : (
-            <>
-              <span className={styles.saveIcon}>💾</span> Save Changes
-            </>
-          )}
-        </button>
-      </div>
-    </form>
+        {/* Actions */}
+        <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+          <Button
+            variant="outlined"
+            onClick={onCancel}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="success"
+            type="submit"
+            disabled={saving}
+          >
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+        </Box>
+      </Stack>
+    </Paper>
   );
 }

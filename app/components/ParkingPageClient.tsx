@@ -4,12 +4,26 @@ import { useState } from "react";
 import { listParkings, deleteParking } from "@/app/actions/parking";
 import ParkingCreateForm from "@/app/components/ParkingCreateForm";
 import { Parking } from "@/app/schemas/parking";
+import {
+  Container,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Box,
+  CircularProgress,
+  Stack,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface ParkingPageClientProps {
   initialParkings: Parking[];
 }
 
-export default function ParkingPageClient({ initialParkings }: ParkingPageClientProps) {
+export default function ParkingPageClient({
+  initialParkings,
+}: ParkingPageClientProps) {
   const [parkings, setParkings] = useState<Parking[]>(initialParkings);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -44,60 +58,60 @@ export default function ParkingPageClient({ initialParkings }: ParkingPageClient
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Parkings</h1>
-      
-      <ParkingCreateForm onSuccess={loadParkings} />
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Stack spacing={4}>
+        <Typography variant="h2" sx={{ fontWeight: 700 }}>
+          Parkings
+        </Typography>
 
-      <div style={{ marginTop: "40px" }}>
-        <h2>Existing Parkings</h2>
-        {isLoading ? (
-          <p>Loading parkings...</p>
-        ) : parkings.length === 0 ? (
-          <p>No parkings found.</p>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {parkings.map((parking) => (
-              <li
-                key={parking.parking_id}
-                style={{
-                  padding: "10px",
-                  marginBottom: "8px",
-                  backgroundColor: "#f9f9f9",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <strong>{parking.name}</strong>
-                  <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
-                    ID: {parking.parking_id}
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDelete(parking.parking_id)}
-                  disabled={deletingId === parking.parking_id}
-                  style={{
-                    padding: "5px 10px",
-                    backgroundColor: "#dc3545",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: deletingId === parking.parking_id ? "not-allowed" : "pointer",
-                    opacity: deletingId === parking.parking_id ? 0.6 : 1,
-                    fontSize: "12px",
+        <ParkingCreateForm onSuccess={loadParkings} />
+
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
+            Existing Parkings
+          </Typography>
+          {isLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : parkings.length === 0 ? (
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              No parkings found.
+            </Typography>
+          ) : (
+            <List>
+              {parkings.map((parking) => (
+                <ListItem
+                  key={parking.parking_id}
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => handleDelete(parking.parking_id)}
+                      disabled={deletingId === parking.parking_id}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  }
+                  sx={{
+                    bgcolor: "background.paper",
+                    borderRadius: 1,
+                    mb: 1,
+                    border: "1px solid",
+                    borderColor: "divider",
                   }}
                 >
-                  {deletingId === parking.parking_id ? "Deleting..." : "Delete"}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+                  <ListItemText
+                    primary={parking.name}
+                    secondary={`ID: ${parking.parking_id}`}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
+      </Stack>
+    </Container>
   );
 }

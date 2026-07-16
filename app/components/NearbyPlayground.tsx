@@ -8,7 +8,19 @@ import { listAmenities } from "@/app/actions/amenity";
 import { amenityNameToDisplay } from "@/app/utils/amenityDisplay";
 import { getTileUrl } from "@/app/utils/tiles";
 import RatingDisplay from "./RatingDisplay";
-import styles from "@/app/page.module.css";
+import {
+  Card,
+  CardMedia,
+  CardContent,
+  CardActions,
+  Chip,
+  Button,
+  Typography,
+  Box,
+  Stack,
+  ListItem,
+} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
 interface PlaygroundProps {
   playground: {
@@ -18,7 +30,7 @@ interface PlaygroundProps {
     lon: number;
     distance?: number;
     tags?: Record<string, string>;
-  }
+  };
 }
 
 // Helper to get emoji based on leisure type
@@ -30,78 +42,65 @@ function getLeisureEmoji(leisure: string | undefined): string {
 }
 
 // Helper to extract and format relevant tag chips
-function getTagChips(tags: Record<string, string> | undefined): Array<{ label: string; type: string }> {
+function getTagChips(tags: Record<string, string> | undefined): Array<{
+  label: string;
+  type: string;
+}> {
   if (!tags) return [];
-  
+
   const chips: Array<{ label: string; type: string }> = [];
-  
-  // Leisure type
+
   if (tags.leisure) {
     chips.push({
       label: tags.leisure === "playground" ? "Playground" : "Park",
       type: "leisure",
     });
   }
-  
-  // Surface
+
   if (tags.surface) {
     const surfaceLabel = {
-      grass: "Grass",
       asphalt: "Asphalt",
-      paved_smooth: "Paved",
-      wood_chips: "Wood chips",
+      wood_chips: "Wood Chips",
       sand: "Sand",
       rubber: "Rubber",
-    }[tags.surface] || "Park";
-    chips.push({ label: surfaceLabel, type: "surface" });
+      grass: "Grass",
+      concrete: "Concrete",
+    }[tags.surface];
+    if (surfaceLabel) {
+      chips.push({ label: surfaceLabel, type: "surface" });
+    }
   }
-  
-  // Lit
-  if (tags.lit === "yes") {
-    chips.push({ label: "Lit", type: "feature" });
+
+  if (tags.lit) {
+    chips.push({ label: "Lit", type: "lit" });
   }
-  
-  // Wheelchair accessible
+
   if (tags.wheelchair === "yes") {
-    chips.push({ label: "Accessible", type: "feature" });
+    chips.push({ label: "Wheelchair Accessible", type: "wheelchair" });
   }
-  
-  // Fee
-  if (tags.fee === "yes") {
-    chips.push({ label: "Paid", type: "feature" });
-  }
-  
-  // Restricted access
-  if (tags.access === "private" || tags.access === "customers") {
-    chips.push({ label: "Restricted", type: "feature" });
-  }
-  
-  return chips.slice(0, 4); // Limit to 4 chips
+
+  return chips;
 }
 
-// Helper to get emoji for amenity type
-function getAmenityEmoji(amenityName: string): string {
-  const lowerName = amenityName.toLowerCase();
-  if (lowerName.includes("swing")) return "🎪";
-  if (lowerName.includes("slide")) return "🛝";
-  if (lowerName.includes("basketball")) return "🏀";
-  if (lowerName.includes("tennis")) return "🎾";
-  if (lowerName.includes("picnic")) return "🧺";
-  if (lowerName.includes("table")) return "🏓";
-  if (lowerName.includes("bench")) return "🪑";
-  if (lowerName.includes("fountain")) return "💧";
-  if (lowerName.includes("grill")) return "🔥";
-  if (lowerName.includes("wheelchair")) return "♿";
-  return "✨";
-}
-
-export default function Playground({ playground }: PlaygroundProps) {
-  const { exists, storedName, playground: savedPlayground, loading, refetch } = usePlaygroundExists(playground.id);
+export default function NearbyPlayground({ playground }: PlaygroundProps) {
+  const {
+    exists,
+    loading,
+    refetch,
+    playground: savedPlayground,
+  } = usePlaygroundExists(playground.id);
+  const [storedName, setStoredName] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [amenityNames, setAmenityNames] = useState<string[]>([]);
   const [amenitiesLoaded, setAmenitiesLoaded] = useState(false);
-  
-  // Load amenities when playground is saved
+  const [amenityNames, setAmenityNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    const name = localStorage.getItem(`playground-${playground.id}-name`);
+    if (name) {
+      setStoredName(name);
+    }
+  }, [playground.id]);
+
   useEffect(() => {
     const loadAmenityNames = async () => {
       if (!savedPlayground?.amenities || savedPlayground.amenities.length === 0) {
@@ -111,7 +110,9 @@ export default function Playground({ playground }: PlaygroundProps) {
 
       try {
         const allAmenities = await listAmenities();
-        const amenityMap = new Map(allAmenities.map((a) => [a.amenity_id, amenityNameToDisplay(a.name)]));
+        const amenityMap = new Map(
+          allAmenities.map((a) => [a.amenity_id, amenityNameToDisplay(a.name)])
+        );
         const names = savedPlayground.amenities
           .map((id) => amenityMap.get(id))
           .filter((name): name is string => name !== undefined);
@@ -139,133 +140,199 @@ export default function Playground({ playground }: PlaygroundProps) {
         longitude: playground.lon,
         tags: playground.tags,
       });
-      
+
       if (result.success) {
         refetch();
       } else {
         alert(`Failed to save: ${result.error}`);
       }
     } catch (error) {
-      alert(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      alert(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     } finally {
       setSaving(false);
     }
   };
 
   const cardContent = (
-    <div className={`${styles.card} ${exists ? styles.cardSaved : styles.cardUnsaved}`}>
-      {/* Header with tile map image */}
-      <div className={styles.cardHeader}>
-        <img
-          src={getTileUrl(playground.lat, playground.lon)}
+    <Card
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        borderRadius: 2,
+        border: exists
+          ? "2px solid"
+          : "1px solid",
+        borderColor: exists ? "success.main" : "divider",
+        transition: "all 0.2s ease",
+        "&:hover": {
+          boxShadow: 3,
+          transform: "translateY(-2px)",
+        },
+      }}
+    >
+      {/* Map Image */}
+      <Box sx={{ position: "relative", overflow: "hidden", height: 150 }}>
+        <CardMedia
+          component="img"
+          height={150}
+          image={getTileUrl(playground.lat, playground.lon)}
           alt={`Map of ${displayName}`}
-          className={styles.cardHeaderImage}
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
+          sx={{ objectFit: "cover" }}
         />
-        <span className={styles.cardHeaderEmojiOverlay}>{emoji}</span>
-        <span className={styles.cardHeaderAttribution}>© OSM</span>
-      </div>
-      
-      {/* Body content */}
-      <div className={styles.cardBody}>
-        {/* Title row with distance badge */}
-        <div className={styles.cardTitleRow}>
-          <h3 className={styles.cardName}>{displayName}</h3>
+        {/* Emoji overlay */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            fontSize: 24,
+            background: "rgba(255, 255, 255, 0.9)",
+            borderRadius: 1,
+            p: 0.5,
+          }}
+        >
+          {emoji}
+        </Box>
+        {/* Attribution */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 4,
+            right: 4,
+            fontSize: "0.7rem",
+            color: "white",
+            background: "rgba(0, 0, 0, 0.5)",
+            px: 0.5,
+            borderRadius: 0.5,
+          }}
+        >
+          © OSM
+        </Box>
+      </Box>
+
+      <CardContent sx={{ flexGrow: 1 }}>
+        {/* Title with distance */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "start",
+            mb: 1,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              fontSize: "1rem",
+              flex: 1,
+              wordBreak: "break-word",
+            }}
+          >
+            {displayName}
+          </Typography>
           {playground.distance && (
-            <span className={styles.cardDistanceBadge}>
-              {playground.distance.toFixed(1)} km
-            </span>
+            <Chip
+              label={`${playground.distance.toFixed(1)} km`}
+              size="small"
+              variant="outlined"
+              sx={{ ml: 1, flexShrink: 0 }}
+            />
           )}
-        </div>
-        
-        {/* Rating display - only show for saved playgrounds */}
+        </Box>
+
+        {/* Rating - only for saved */}
         {exists && savedPlayground && (
-          <div className={styles.cardRatingRow}>
+          <Box sx={{ mb: 1.5, py: 1, borderBottom: "1px solid", borderColor: "divider" }}>
             <RatingDisplay
               rating={savedPlayground.average_rating}
               count={savedPlayground.rating_count}
               size="small"
             />
-          </div>
+          </Box>
         )}
-        
+
         {/* Tag chips */}
         {chips.length > 0 && (
-          <div className={styles.cardChips}>
+          <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mb: 1.5 }}>
             {chips.map((chip) => (
-              <span
+              <Chip
                 key={chip.label}
-                className={`${styles.cardChip} ${styles[`cardChip${chip.type.charAt(0).toUpperCase() + chip.type.slice(1)}`]}`}
-              >
-                {chip.label}
-              </span>
+                label={chip.label}
+                size="small"
+                variant="outlined"
+              />
             ))}
-          </div>
+          </Box>
         )}
-        
-        {/* Amenities Section - only show for saved playgrounds */}
+
+        {/* Amenities - only for saved */}
         {exists && amenitiesLoaded && amenityNames.length > 0 && (
-          <div className={styles.cardAmenitiesSection}>
-            <h4 className={styles.cardAmenitiesTitle}>Amenities</h4>
-            <div className={styles.cardAmenitiesList}>
+          <Box>
+            <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+              Amenities
+            </Typography>
+            <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap", mt: 0.5 }}>
               {amenityNames.map((name) => (
-                <div key={name} className={styles.cardAmenityItem}>
-                  <span className={styles.cardAmenityEmoji}>{getAmenityEmoji(name)}</span>
-                  <span className={styles.cardAmenityName}>{name}</span>
-                </div>
+                <Chip key={name} label={name} size="small" variant="outlined" />
               ))}
-            </div>
-          </div>
+            </Box>
+          </Box>
         )}
-        
-        {/* Footer with status and action */}
-        <div className={styles.cardFooter}>
-          <div className={styles.cardStatus}>
-            {loading ? (
-              <span className={styles.cardStatusChecking}>Checking...</span>
-            ) : exists ? (
-              <span className={styles.cardStatusSaved}>✓ In Database</span>
-            ) : (
-              <span className={styles.cardStatusNotSaved}>⊘ Not saved yet</span>
-            )}
-          </div>
-          {exists === false && !loading && (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className={styles.addToScoutButton}
-            >
-              {saving ? "Adding..." : "Add to Scout"}
-            </button>
-          )}
-          {exists === true && (
-            <span className={styles.viewDetailsIndicator}>View →</span>
-          )}
-        </div>
-      </div>
-    </div>
+      </CardContent>
+
+      <CardActions sx={{ pt: 1 }}>
+        {loading ? (
+          <Typography variant="body2" sx={{ color: "text.secondary", flex: 1 }}>
+            Loading...
+          </Typography>
+        ) : exists === false ? (
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            variant="contained"
+            startIcon={<AddIcon />}
+            size="small"
+            fullWidth
+          >
+            {saving ? "Adding..." : "Add to Scout"}
+          </Button>
+        ) : (
+          <>
+            <Box sx={{ flex: 1 }}>
+              <Typography variant="caption" sx={{ color: "success.main", fontWeight: 600 }}>
+                ✓ Saved to Scout
+              </Typography>
+            </Box>
+            <Typography variant="caption" sx={{ color: "primary.main" }}>
+              View →
+            </Typography>
+          </>
+        )}
+      </CardActions>
+    </Card>
   );
 
   // If saved to DB, wrap in a link to the detail page
   if (exists === true) {
     return (
-      <li>
+      <ListItem sx={{ p: 0, mb: 1.5 }}>
         <Link
           href={`/playground/playground-${playground.id}`}
-          className={styles.cardWrapper}
+          style={{
+            textDecoration: "none",
+            width: "100%",
+          }}
         >
           {cardContent}
         </Link>
-      </li>
+      </ListItem>
     );
   }
 
   // If not saved, render as plain card (no link)
-  return (
-    <li>
-      {cardContent}
-    </li>
-  );
+  return <ListItem sx={{ p: 0, mb: 1.5 }}>{cardContent}</ListItem>;
 }

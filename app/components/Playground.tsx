@@ -9,11 +9,39 @@ import { amenityNameToDisplay } from "@/app/utils/amenityDisplay";
 import { listParkings } from "@/app/actions/parking";
 import RatingDisplay from "./RatingDisplay";
 import RatingForm from "./RatingForm";
-import styles from "./playground.module.css";
+import {
+  Paper,
+  Box,
+  Typography,
+  Button,
+  Stack,
+  Divider,
+  Chip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const PlaygroundMap = dynamic(() => import("./PlaygroundMap"), {
   ssr: false,
-  loading: () => <div style={{ height: "320px", width: "100%", backgroundColor: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "8px" }}>Loading map...</div>,
+  loading: () => (
+    <Box
+      sx={{
+        height: 320,
+        width: "100%",
+        backgroundColor: "#f0f0f0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 1.5,
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  ),
 });
 
 interface PlaygroundProps {
@@ -37,7 +65,9 @@ export default function Playground({ playground }: PlaygroundProps) {
 
       try {
         const allAmenities = await listAmenities();
-        const amenityMap = new Map(allAmenities.map((a) => [a.amenity_id, amenityNameToDisplay(a.name)]));
+        const amenityMap = new Map(
+          allAmenities.map((a) => [a.amenity_id, amenityNameToDisplay(a.name)])
+        );
         const names = playground.amenities
           .map((id) => amenityMap.get(id))
           .filter((name): name is string => name !== undefined);
@@ -85,152 +115,234 @@ export default function Playground({ playground }: PlaygroundProps) {
   };
 
   return (
-    <div className={styles.contentPanel}>
-      {/* Map Section */}
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Location</h2>
-        <div className={styles.mapContainer}>
-          <PlaygroundMap
-            latitude={playground.latitude}
-            longitude={playground.longitude}
-            name={playground.name}
-          />
-        </div>
-      </section>
+    <Paper
+      elevation={2}
+      sx={{
+        borderRadius: 3,
+        p: 4,
+        background: "white",
+      }}
+    >
+      <Stack spacing={4}>
+        {/* Map Section */}
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+            Location
+          </Typography>
+          <Box
+            sx={{
+              borderRadius: 2,
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+            }}
+          >
+            <PlaygroundMap
+              latitude={playground.latitude}
+              longitude={playground.longitude}
+              name={playground.name}
+            />
+          </Box>
+        </Box>
 
-      {/* Rating Section */}
-      <section className={styles.section}>
-        <div className={styles.ratingHeader}>
-          <h2 className={styles.sectionTitle}>Rating</h2>
-          {session?.user && (
-            <button
-              onClick={() => setIsEditingRating(!isEditingRating)}
-              className={styles.editButton}
-            >
-              {isEditingRating ? "Cancel" : "Add Rating"}
-            </button>
-          )}
-        </div>
+        <Divider />
 
-        {isEditingRating && session?.user ? (
-          <RatingForm
-            playgroundId={playground.park_id}
-            userId={(session.user as any).id}
-            onSuccess={() => setIsEditingRating(false)}
-            onCancel={() => setIsEditingRating(false)}
-          />
-        ) : (
-          <div className={styles.ratingDisplay}>
-            <div className={styles.ratingSection}>
-              <span className={styles.ratingLabel}>Average Rating:</span>
+        {/* Rating Section */}
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              Rating
+            </Typography>
+            {session?.user && (
+              <Button
+                onClick={() => setIsEditingRating(!isEditingRating)}
+                variant={isEditingRating ? "outlined" : "contained"}
+                size="small"
+              >
+                {isEditingRating ? "Cancel" : "Add Rating"}
+              </Button>
+            )}
+          </Box>
+
+          {isEditingRating && session?.user ? (
+            <RatingForm
+              playgroundId={playground.park_id}
+              userId={(session.user as any).id}
+              onSuccess={() => setIsEditingRating(false)}
+              onCancel={() => setIsEditingRating(false)}
+            />
+          ) : (
+            <Box sx={{ pl: 2, borderLeft: "3px solid", borderColor: "primary.main" }}>
+              <Typography variant="body2" sx={{ mb: 1, color: "text.secondary" }}>
+                Average Rating:
+              </Typography>
               <RatingDisplay
                 rating={playground.average_rating}
                 count={playground.rating_count}
                 size="large"
               />
-            </div>
-          </div>
+            </Box>
+          )}
+
+          {!session?.user && (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              Sign in to add your rating
+            </Alert>
+          )}
+        </Box>
+
+        <Divider />
+
+        {/* Amenities Section */}
+        {playground.amenities && playground.amenities.length > 0 && (
+          <>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+                Amenities
+              </Typography>
+              {!amenitiesLoaded ? (
+                <CircularProgress size={24} />
+              ) : amenityNames.length > 0 ? (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {amenityNames.map((name, index) => (
+                    <Chip key={index} label={name} variant="outlined" />
+                  ))}
+                </Box>
+              ) : (
+                <Alert severity="info">No amenities available</Alert>
+              )}
+            </Box>
+            <Divider />
+          </>
         )}
 
-        {!session?.user && (
-          <p className={styles.emptyState} style={{ marginTop: "1rem", textAlign: "center" }}>
-            Sign in to add your rating
-          </p>
+        {/* Parking Section */}
+        {playground.parkings && playground.parkings.length > 0 && (
+          <>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+                Parking
+              </Typography>
+              {!parkingsLoaded ? (
+                <CircularProgress size={24} />
+              ) : parkingNames.length > 0 ? (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                  {parkingNames.map((name, index) => (
+                    <Chip key={index} label={name} variant="outlined" />
+                  ))}
+                </Box>
+              ) : (
+                <Alert severity="info">No parking available</Alert>
+              )}
+            </Box>
+            <Divider />
+          </>
         )}
-      </section>
 
-      {/* Amenities Section */}
-      {playground.amenities && playground.amenities.length > 0 && (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Amenities</h2>
-          {!amenitiesLoaded ? (
-            <p className={styles.emptyState}>Loading amenities...</p>
-          ) : amenityNames.length > 0 ? (
-            <div className={styles.pillList}>
-              {amenityNames.map((name, index) => (
-                <span key={index} className={`${styles.pill} ${styles.pillAmenity}`}>
-                  {name}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className={styles.emptyState}>No amenities available</p>
-          )}
-        </section>
-      )}
+        {/* OSM Tags Section - Accordion */}
+        {playground.osm_tags && Object.keys(playground.osm_tags).length > 0 && (
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                Additional Tags
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+                {Object.entries(playground.osm_tags).map(([key, value]) => (
+                  <Box key={key}>
+                    <Box
+                      sx={{
+                        p: 1.5,
+                        backgroundColor: "#f5f5f5",
+                        borderRadius: 1,
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        sx={{ fontWeight: 700, color: "text.secondary", display: "block" }}
+                      >
+                        {key}
+                      </Typography>
+                      <Typography variant="body2" sx={{ mt: 0.5 }}>
+                        {value}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            </AccordionDetails>
+          </Accordion>
+        )}
 
-      {/* Parking Section */}
-      {playground.parkings && playground.parkings.length > 0 && (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>Parking</h2>
-          {!parkingsLoaded ? (
-            <p className={styles.emptyState}>Loading parking...</p>
-          ) : parkingNames.length > 0 ? (
-            <div className={styles.pillList}>
-              {parkingNames.map((name, index) => (
-                <span key={index} className={`${styles.pill} ${styles.pillParking}`}>
-                  {name}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className={styles.emptyState}>No parking available</p>
-          )}
-        </section>
-      )}
-
-      {/* OSM Tags Section - Collapsible */}
-      {playground.osm_tags && Object.keys(playground.osm_tags).length > 0 && (
-        <section className={styles.section}>
-          <details className={styles.tagsDetails}>
-            <summary>Additional Tags</summary>
-            <div className={styles.tagsGrid}>
-              {Object.entries(playground.osm_tags).map(([key, value]) => (
-                <div key={key} className={styles.tagEntry}>
-                  <div className={styles.tagKey}>{key}</div>
-                  <div className={styles.tagValue}>{value}</div>
-                </div>
-              ))}
-            </div>
-          </details>
-        </section>
-      )}
-
-      {/* Metadata Footer */}
-      <div className={styles.metadata}>
-        <div className={styles.metadataGrid}>
-          <div className={styles.metadataEntry}>
-            <span className={styles.metadataLabel}>Park ID</span>
-            <span className={styles.metadataValue}>{playground.park_id}</span>
-          </div>
-          <div className={styles.metadataEntry}>
-            <span className={styles.metadataLabel}>OSM ID</span>
-            <span className={styles.metadataValue}>{playground.osm_id}</span>
-          </div>
-          <div className={styles.metadataEntry}>
-            <span className={styles.metadataLabel}>Latitude</span>
-            <span className={styles.metadataValue}>{playground.latitude}</span>
-          </div>
-          <div className={styles.metadataEntry}>
-            <span className={styles.metadataLabel}>Longitude</span>
-            <span className={styles.metadataValue}>{playground.longitude}</span>
-          </div>
-          <div className={styles.metadataEntry}>
-            <span className={styles.metadataLabel}>Created</span>
-            <span className={styles.metadataTimestamp}>{formatDate(playground.created_at)}</span>
-          </div>
-          <div className={styles.metadataEntry}>
-            <span className={styles.metadataLabel}>Updated</span>
-            <span className={styles.metadataTimestamp}>{formatDate(playground.updated_at)}</span>
-          </div>
-          {playground.location_hash && (
-            <div className={styles.metadataEntry}>
-              <span className={styles.metadataLabel}>Location Hash</span>
-              <span className={styles.metadataValue}>{playground.location_hash}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+        {/* Metadata Footer */}
+        <Box sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontWeight: 600,
+              mb: 2,
+              color: "text.secondary",
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+            }}
+          >
+            Metadata
+          </Typography>
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "1fr 1fr 1fr" }, gap: 2 }}>
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                Park ID
+              </Typography>
+              <Typography variant="body2">{playground.park_id}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                OSM ID
+              </Typography>
+              <Typography variant="body2">{playground.osm_id}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                Latitude
+              </Typography>
+              <Typography variant="body2">{playground.latitude}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                Longitude
+              </Typography>
+              <Typography variant="body2">{playground.longitude}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                Created
+              </Typography>
+              <Typography variant="body2">{formatDate(playground.created_at)}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                Updated
+              </Typography>
+              <Typography variant="body2">{formatDate(playground.updated_at)}</Typography>
+            </Box>
+            {playground.location_hash && (
+              <Box sx={{ gridColumn: "1 / -1" }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                  Location Hash
+                </Typography>
+                <Typography variant="body2">{playground.location_hash}</Typography>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Stack>
+    </Paper>
   );
 }

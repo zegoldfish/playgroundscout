@@ -5,12 +5,26 @@ import { listAmenities, deleteAmenity } from "@/app/actions/amenity";
 import { amenityNameToDisplay } from "@/app/utils/amenityDisplay";
 import AmenityCreateForm from "@/app/components/AmenityCreateForm";
 import { Amenity } from "@/app/schemas/amenity";
+import {
+  Container,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Box,
+  CircularProgress,
+  Stack,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface AmenityPageClientProps {
   initialAmenities: Amenity[];
 }
 
-export default function AmenityPageClient({ initialAmenities }: AmenityPageClientProps) {
+export default function AmenityPageClient({
+  initialAmenities,
+}: AmenityPageClientProps) {
   const [amenities, setAmenities] = useState<Amenity[]>(initialAmenities);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -45,60 +59,60 @@ export default function AmenityPageClient({ initialAmenities }: AmenityPageClien
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Amenities</h1>
-      
-      <AmenityCreateForm onSuccess={loadAmenities} />
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Stack spacing={4}>
+        <Typography variant="h2" sx={{ fontWeight: 700 }}>
+          Amenities
+        </Typography>
 
-      <div style={{ marginTop: "40px" }}>
-        <h2>Existing Amenities</h2>
-        {isLoading ? (
-          <p>Loading amenities...</p>
-        ) : amenities.length === 0 ? (
-          <p>No amenities found.</p>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {amenities.map((amenity) => (
-              <li
-                key={amenity.amenity_id}
-                style={{
-                  padding: "10px",
-                  marginBottom: "8px",
-                  backgroundColor: "#f9f9f9",
-                  border: "1px solid #ddd",
-                  borderRadius: "4px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <div>
-                  <strong>{amenityNameToDisplay(amenity.name)}</strong>
-                  <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
-                    ID: {amenity.amenity_id}
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDelete(amenity.amenity_id)}
-                  disabled={deletingId === amenity.amenity_id}
-                  style={{
-                    padding: "5px 10px",
-                    backgroundColor: "#dc3545",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: deletingId === amenity.amenity_id ? "not-allowed" : "pointer",
-                    opacity: deletingId === amenity.amenity_id ? 0.6 : 1,
-                    fontSize: "12px",
+        <AmenityCreateForm onSuccess={loadAmenities} />
+
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
+            Existing Amenities
+          </Typography>
+          {isLoading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : amenities.length === 0 ? (
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              No amenities found.
+            </Typography>
+          ) : (
+            <List>
+              {amenities.map((amenity) => (
+                <ListItem
+                  key={amenity.amenity_id}
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => handleDelete(amenity.amenity_id)}
+                      disabled={deletingId === amenity.amenity_id}
+                      color="error"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  }
+                  sx={{
+                    bgcolor: "background.paper",
+                    borderRadius: 1,
+                    mb: 1,
+                    border: "1px solid",
+                    borderColor: "divider",
                   }}
                 >
-                  {deletingId === amenity.amenity_id ? "Deleting..." : "Delete"}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+                  <ListItemText
+                    primary={amenityNameToDisplay(amenity.name)}
+                    secondary={`ID: ${amenity.amenity_id}`}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
+      </Stack>
+    </Container>
   );
 }
