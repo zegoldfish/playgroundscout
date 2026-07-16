@@ -23,6 +23,9 @@ export async function createAmenity(data: CreateAmenity): Promise<Amenity> {
 	if (!session) {
 		throw new Error("Authentication required");
 	}
+	if ((session.user as any).role !== "admin") {
+		throw new Error("Admin role required");
+	}
 
 	// Check for duplicates
 	const existingAmenities = await listAmenities();
@@ -71,6 +74,13 @@ export async function listAmenities(): Promise<Amenity[]> {
 
 // Update Amenity
 export async function updateAmenity(data: UpdateAmenity): Promise<Amenity | null> {
+	const session = await getServerSession(authOptions);
+	if (!session) {
+		throw new Error("Authentication required");
+	}
+	if ((session.user as any).role !== "admin") {
+		throw new Error("Admin role required");
+	}
 	// Only name is updatable
 	if (!data.amenity_id) return null;
 	const { amenity_id, name } = data;
@@ -90,6 +100,9 @@ export async function deleteAmenity(amenity_id: string): Promise<boolean> {
 	const session = await getServerSession(authOptions);
 	if (!session) {
 		throw new Error("Authentication required");
+	}
+	if ((session.user as any).role !== "admin") {
+		throw new Error("Admin role required");
 	}
 
 	await docClient.send(

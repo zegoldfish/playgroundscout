@@ -23,6 +23,9 @@ export async function createParking(data: CreateParking): Promise<Parking> {
 	if (!session) {
 		throw new Error("Authentication required");
 	}
+	if ((session.user as any).role !== "admin") {
+		throw new Error("Admin role required");
+	}
 
 	// Check for duplicates
 	const existingParkings = await listParkings();
@@ -71,6 +74,13 @@ export async function listParkings(): Promise<Parking[]> {
 
 // Update Parking
 export async function updateParking(data: UpdateParking): Promise<Parking | null> {
+	const session = await getServerSession(authOptions);
+	if (!session) {
+		throw new Error("Authentication required");
+	}
+	if ((session.user as any).role !== "admin") {
+		throw new Error("Admin role required");
+	}
 	// Only name is updatable
 	if (!data.parking_id) return null;
 	const { parking_id, name } = data;
@@ -90,6 +100,9 @@ export async function deleteParking(parking_id: string): Promise<boolean> {
 	const session = await getServerSession(authOptions);
 	if (!session) {
 		throw new Error("Authentication required");
+	}
+	if ((session.user as any).role !== "admin") {
+		throw new Error("Admin role required");
 	}
 
 	await docClient.send(

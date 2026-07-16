@@ -3,10 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth/next";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { authOptions } from "@/app/auth";
 import { RatingRecord } from "@/app/schemas/rating";
-import { updatePlayground } from "@/app/actions/playground";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -45,6 +44,30 @@ export async function getPlaygroundRatings(playgroundId: string): Promise<Rating
     return (Items as RatingRecord[]) || [];
   } catch (error) {
     console.error("Error fetching playground ratings:", error);
+    throw error;
+  }
+}
+
+async function updatePlaygroundRatingStats(
+  parkId: string,
+  averageRating: number,
+  ratingCount: number
+): Promise<void> {
+  try {
+    await docClient.send(
+      new UpdateCommand({
+        TableName: "playgrounds",
+        Key: { park_id: parkId },
+        UpdateExpression: "SET average_rating = :avgRating, rating_count = :count, updated_at = :updatedAt",
+        ExpressionAttributeValues: {
+          ":avgRating": averageRating,
+          ":count": ratingCount,
+          ":updatedAt": new Date().toISOString(),
+        },
+      })
+    );
+  } catch (error) {
+    console.error("Error updating playground rating stats:", error);
     throw error;
   }
 }
@@ -88,10 +111,11 @@ export async function saveUserRating(
       : undefined;
 
     if (avgRating) {
-      await updatePlayground(playgroundId, {
-        average_rating: parseFloat(avgRating.toFixed(1)),
-        rating_count: allRatings.length,
-      });
+      await updatePlaygroundRatingStats(
+        playgroundId,
+        parseFloat(avgRating.toFixed(1)),
+        allRatings.length
+      );
     }
 
     // Revalidate the playground detail page to show updated ratings

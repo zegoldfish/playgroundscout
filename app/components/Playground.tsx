@@ -7,6 +7,8 @@ import { Playground as PlaygroundType } from "@/app/schemas/playground";
 import { listAmenities } from "@/app/actions/amenity";
 import { amenityNameToDisplay } from "@/app/utils/amenityDisplay";
 import { listParkings } from "@/app/actions/parking";
+import { getUserRating } from "@/app/actions/rating";
+import { RatingRecord } from "@/app/schemas/rating";
 import RatingDisplay from "./RatingDisplay";
 import RatingForm from "./RatingForm";
 import {
@@ -55,6 +57,8 @@ export default function Playground({ playground }: PlaygroundProps) {
   const [parkingNames, setParkingNames] = useState<string[]>([]);
   const [parkingsLoaded, setParkingsLoaded] = useState(false);
   const [isEditingRating, setIsEditingRating] = useState(false);
+  const [userRatingRecord, setUserRatingRecord] = useState<RatingRecord | null>(null);
+  const [userRatingLoaded, setUserRatingLoaded] = useState(false);
 
   useEffect(() => {
     const loadAmenityNames = async () => {
@@ -103,6 +107,25 @@ export default function Playground({ playground }: PlaygroundProps) {
     };
     loadParkingNames();
   }, [playground.parkings]);
+
+  useEffect(() => {
+    const loadUserRating = async () => {
+      if (!session?.user) {
+        setUserRatingLoaded(true);
+        return;
+      }
+
+      try {
+        const rating = await getUserRating(playground.park_id, (session.user as any).id);
+        setUserRatingRecord(rating);
+        setUserRatingLoaded(true);
+      } catch (error) {
+        console.error("Failed to load user rating:", error);
+        setUserRatingLoaded(true);
+      }
+    };
+    loadUserRating();
+  }, [playground.park_id, session?.user]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -165,7 +188,7 @@ export default function Playground({ playground }: PlaygroundProps) {
                 variant={isEditingRating ? "outlined" : "contained"}
                 size="small"
               >
-                {isEditingRating ? "Cancel" : "Add Rating"}
+                {isEditingRating ? "Cancel" : userRatingRecord ? "Edit Rating" : "Add Rating"}
               </Button>
             )}
           </Box>
@@ -174,6 +197,8 @@ export default function Playground({ playground }: PlaygroundProps) {
             <RatingForm
               playgroundId={playground.park_id}
               userId={(session.user as any).id}
+              initialRating={userRatingRecord?.rating}
+              initialNotes={userRatingRecord?.notes}
               onSuccess={() => setIsEditingRating(false)}
               onCancel={() => setIsEditingRating(false)}
             />
@@ -185,6 +210,7 @@ export default function Playground({ playground }: PlaygroundProps) {
               <RatingDisplay
                 rating={playground.average_rating}
                 count={playground.rating_count}
+                userRating={userRatingRecord?.rating}
                 size="large"
               />
             </Box>
@@ -281,67 +307,62 @@ export default function Playground({ playground }: PlaygroundProps) {
           </Accordion>
         )}
 
-        {/* Metadata Footer */}
-        <Box sx={{ pt: 2, borderTop: "1px solid", borderColor: "divider" }}>
-          <Typography
-            variant="subtitle2"
-            sx={{
-              fontWeight: 600,
-              mb: 2,
-              color: "text.secondary",
-              textTransform: "uppercase",
-              letterSpacing: 0.5,
-            }}
-          >
-            Metadata
-          </Typography>
-          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "1fr 1fr 1fr" }, gap: 2 }}>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
-                Park ID
-              </Typography>
-              <Typography variant="body2">{playground.park_id}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
-                OSM ID
-              </Typography>
-              <Typography variant="body2">{playground.osm_id}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
-                Latitude
-              </Typography>
-              <Typography variant="body2">{playground.latitude}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
-                Longitude
-              </Typography>
-              <Typography variant="body2">{playground.longitude}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
-                Created
-              </Typography>
-              <Typography variant="body2">{formatDate(playground.created_at)}</Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
-                Updated
-              </Typography>
-              <Typography variant="body2">{formatDate(playground.updated_at)}</Typography>
-            </Box>
-            {playground.location_hash && (
-              <Box sx={{ gridColumn: "1 / -1" }}>
+        {/* Metadata Section - Accordion */}
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              Metadata
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr 1fr", sm: "1fr 1fr 1fr" }, gap: 2 }}>
+              <Box sx={{ p: 1.5, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
                 <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
-                  Location Hash
+                  Park ID
                 </Typography>
-                <Typography variant="body2">{playground.location_hash}</Typography>
+                <Typography variant="body2">{playground.park_id}</Typography>
               </Box>
-            )}
-          </Box>
-        </Box>
+              <Box sx={{ p: 1.5, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                  OSM ID
+                </Typography>
+                <Typography variant="body2">{playground.osm_id}</Typography>
+              </Box>
+              <Box sx={{ p: 1.5, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                  Latitude
+                </Typography>
+                <Typography variant="body2">{playground.latitude}</Typography>
+              </Box>
+              <Box sx={{ p: 1.5, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                  Longitude
+                </Typography>
+                <Typography variant="body2">{playground.longitude}</Typography>
+              </Box>
+              <Box sx={{ p: 1.5, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                  Created
+                </Typography>
+                <Typography variant="body2">{formatDate(playground.created_at)}</Typography>
+              </Box>
+              <Box sx={{ p: 1.5, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                  Updated
+                </Typography>
+                <Typography variant="body2">{formatDate(playground.updated_at)}</Typography>
+              </Box>
+              {playground.location_hash && (
+                <Box sx={{ gridColumn: "1 / -1", p: 1.5, backgroundColor: "#f5f5f5", borderRadius: 1 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 600, color: "text.secondary" }}>
+                    Location Hash
+                  </Typography>
+                  <Typography variant="body2">{playground.location_hash}</Typography>
+                </Box>
+              )}
+            </Box>
+          </AccordionDetails>
+        </Accordion>
       </Stack>
     </Paper>
   );

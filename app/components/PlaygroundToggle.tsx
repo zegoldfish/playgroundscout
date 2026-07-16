@@ -56,7 +56,7 @@ export default function PlaygroundToggle({ playground }: PlaygroundToggleProps) 
             <Typography variant="h2" sx={{ flex: 1, fontWeight: 700 }}>
               {playground.name}
             </Typography>
-            {session?.user && (
+            {(session?.user as any)?.role === "admin" && (
               <Button
                 onClick={() => setIsEditing(true)}
                 variant="contained"

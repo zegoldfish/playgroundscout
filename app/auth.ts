@@ -1,6 +1,7 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
+import { ensureUserExists } from "@/app/utils/userRole";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -25,12 +26,17 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
+        // On first sign-in, look up or create the user record and fetch their role
+        if (user.email) {
+          token.role = await ensureUserExists(user.email, user.name);
+        }
       }
       return token;
     },
     async session({ session, token }: any) {
       if (session.user) {
         (session.user as any).id = token.id;
+        (session.user as any).role = token.role ?? "user";
       }
       return session;
     },

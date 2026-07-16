@@ -140,6 +140,9 @@ export async function updatePlayground(
   if (!session) {
     return { success: false, error: "Authentication required" };
   }
+  if ((session.user as any).role !== "admin") {
+    return { success: false, error: "Admin role required" };
+  }
 
   try {
     const updateFields: Record<string, string | number | string[] | boolean> = {};
