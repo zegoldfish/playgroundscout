@@ -91,17 +91,9 @@ export default function NearbyPlayground({ playground }: PlaygroundProps) {
     refetch,
     playground: savedPlayground,
   } = usePlaygroundExists(playground.id);
-  const [storedName, setStoredName] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [amenitiesLoaded, setAmenitiesLoaded] = useState(false);
   const [amenityNames, setAmenityNames] = useState<string[]>([]);
-
-  useEffect(() => {
-    const name = localStorage.getItem(`playground-${playground.id}-name`);
-    if (name) {
-      setStoredName(name);
-    }
-  }, [playground.id]);
 
   useEffect(() => {
     const loadAmenityNames = async () => {
@@ -128,7 +120,7 @@ export default function NearbyPlayground({ playground }: PlaygroundProps) {
     loadAmenityNames();
   }, [savedPlayground?.amenities]);
 
-  const displayName = storedName ?? playground.name;
+  const displayName = savedPlayground?.name ?? playground.name;
   const emoji = getLeisureEmoji(playground.tags?.leisure);
   const chips = getTagChips(playground.tags);
 
