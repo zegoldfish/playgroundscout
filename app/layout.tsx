@@ -21,6 +21,9 @@ const barriecito = Barriecito({
 export const metadata: Metadata = {
   title: "Playground Scout",
   description: "Discover and Explore the Best Playgrounds Near You",
+  icons: {
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75'>🛝</text></svg>",
+  },
 };
 
 export default function RootLayout({
