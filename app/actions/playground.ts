@@ -6,6 +6,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, PutCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { encode as encodeGeohash } from "ngeohash";
 import { authOptions } from "@/app/auth";
+import { hasElevatedAccess } from "@/app/utils/userRole";
 import { CreatePlayground, Playground } from "@/app/schemas/playground";
 
 const client = new DynamoDBClient({});
@@ -140,7 +141,7 @@ export async function updatePlayground(
   if (!session) {
     return { success: false, error: "Authentication required" };
   }
-  if ((session.user as any).role !== "admin") {
+  if (!hasElevatedAccess((session.user as any).role)) {
     return { success: false, error: "Admin role required" };
   }
 

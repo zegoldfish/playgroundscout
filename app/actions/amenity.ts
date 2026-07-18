@@ -10,6 +10,7 @@ import {
 	ScanCommand 
 } from "@aws-sdk/lib-dynamodb";
 import { authOptions } from "@/app/auth";
+import { hasElevatedAccess } from "@/app/utils/userRole";
 import { Amenity, CreateAmenity, UpdateAmenity } from "@/app/schemas/amenity";
 
 const client = new DynamoDBClient({});
@@ -23,7 +24,7 @@ export async function createAmenity(data: CreateAmenity): Promise<Amenity> {
 	if (!session) {
 		throw new Error("Authentication required");
 	}
-	if ((session.user as any).role !== "admin") {
+	if (!hasElevatedAccess((session.user as any).role)) {
 		throw new Error("Admin role required");
 	}
 
@@ -78,7 +79,7 @@ export async function updateAmenity(data: UpdateAmenity): Promise<Amenity | null
 	if (!session) {
 		throw new Error("Authentication required");
 	}
-	if ((session.user as any).role !== "admin") {
+	if (!hasElevatedAccess((session.user as any).role)) {
 		throw new Error("Admin role required");
 	}
 	// Only name is updatable
@@ -101,7 +102,7 @@ export async function deleteAmenity(amenity_id: string): Promise<boolean> {
 	if (!session) {
 		throw new Error("Authentication required");
 	}
-	if ((session.user as any).role !== "admin") {
+	if (!hasElevatedAccess((session.user as any).role)) {
 		throw new Error("Admin role required");
 	}
 

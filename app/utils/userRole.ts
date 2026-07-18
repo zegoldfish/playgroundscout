@@ -4,7 +4,15 @@ import { DynamoDBDocumentClient, PutCommand, QueryCommand } from "@aws-sdk/lib-d
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
-export type UserRole = "admin" | "user";
+export type UserRole = "admin" | "editor" | "user";
+
+/**
+ * Check if a user role has elevated access (admin or editor).
+ * Used to gate playground/amenity/parking management features.
+ */
+export function hasElevatedAccess(role: UserRole): boolean {
+  return role === "admin" || role === "editor";
+}
 
 /**
  * Looks up a user by email in DynamoDB. If the user does not exist, creates
