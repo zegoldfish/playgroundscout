@@ -9,6 +9,7 @@ import { listAmenities } from "@/app/actions/amenity";
 import { amenityNameToDisplay } from "@/app/utils/amenityDisplay";
 import { getTileUrl } from "@/app/utils/tiles";
 import RatingDisplay from "./RatingDisplay";
+import NavigateButton from "./NavigateButton";
 import {
   Card,
   CardMedia,
@@ -279,7 +280,7 @@ export default function NearbyPlayground({ playground }: PlaygroundProps) {
         )}
       </CardContent>
 
-      <CardActions sx={{ pt: 1 }}>
+      <CardActions sx={{ pt: 1, flexDirection: "column", gap: 1, alignItems: "stretch" }}>
         {loading ? (
           <Typography variant="body2" sx={{ color: "text.secondary", flex: 1 }}>
             Loading...
@@ -306,17 +307,16 @@ export default function NearbyPlayground({ playground }: PlaygroundProps) {
             {saving ? "Adding..." : "Add to Scout"}
           </Button>
         ) : (
-          <>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="caption" sx={{ color: "success.main", fontWeight: 600 }}>
-                ✓ Saved to Scout
-              </Typography>
-            </Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+            <Typography variant="caption" sx={{ color: "success.main", fontWeight: 600 }}>
+              ✓ Saved to Scout
+            </Typography>
             <Typography variant="caption" sx={{ color: "primary.main" }}>
               View →
             </Typography>
-          </>
+          </Box>
         )}
+        <NavigateButton lat={playground.lat} lon={playground.lon} size="small" fullWidth />
       </CardActions>
     </Card>
   );
