@@ -7,10 +7,10 @@ const docClient = DynamoDBDocumentClient.from(client);
 export type UserRole = "admin" | "editor" | "user";
 
 /**
- * Check if a user role has elevated access (admin or editor).
- * Used to gate playground/amenity/parking management features.
+ * Checks if a user role has elevated access for content management.
+ * Elevated roles (admin and editor) can create/edit/delete playgrounds, amenities, and parkings.
  */
-export function hasElevatedAccess(role: UserRole): boolean {
+export function hasElevatedAccess(role?: string): boolean {
   return role === "admin" || role === "editor";
 }
 

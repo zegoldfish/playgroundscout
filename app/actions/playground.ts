@@ -8,6 +8,7 @@ import { encode as encodeGeohash } from "ngeohash";
 import { authOptions } from "@/app/auth";
 import { hasElevatedAccess } from "@/app/utils/userRole";
 import { CreatePlayground, Playground } from "@/app/schemas/playground";
+import { hasElevatedAccess } from "@/app/utils/userRole";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);

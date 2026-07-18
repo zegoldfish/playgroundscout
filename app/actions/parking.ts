@@ -12,6 +12,7 @@ import {
 import { authOptions } from "@/app/auth";
 import { hasElevatedAccess } from "@/app/utils/userRole";
 import { Parking, CreateParking, UpdateParking } from "@/app/schemas/parking";
+import { hasElevatedAccess } from "@/app/utils/userRole";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);

@@ -23,8 +23,6 @@ export default function Header() {
         >
           🛝 Playground Scout
         </Typography>
-        
-        {/* Admin Navigation Links */}
         {hasElevated && (
           <Box sx={{ display: "flex", gap: 1 }}>
             <Button
@@ -32,10 +30,9 @@ export default function Header() {
               href="/amenity"
               sx={{
                 color: "white",
-                textTransform: "none",
-                fontWeight: 500,
+                fontSize: "0.9rem",
                 "&:hover": {
-                  opacity: 0.8,
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
                 },
               }}
             >
@@ -46,10 +43,9 @@ export default function Header() {
               href="/parking"
               sx={{
                 color: "white",
-                textTransform: "none",
-                fontWeight: 500,
+                fontSize: "0.9rem",
                 "&:hover": {
-                  opacity: 0.8,
+                  backgroundColor: "rgba(255, 255, 255, 0.1)",
                 },
               }}
             >
@@ -57,7 +53,6 @@ export default function Header() {
             </Button>
           </Box>
         )}
-        
         <AuthStatus />
       </Toolbar>
     </AppBar>
