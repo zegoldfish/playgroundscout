@@ -1,14 +1,18 @@
 "use client";
 
-import { Box, Typography, AppBar, Toolbar, Button } from "@mui/material";
+import { useState } from "react";
+import { Box, Typography, AppBar, Toolbar, Button, IconButton } from "@mui/material";
+import SettingsIcon from "@mui/icons-material/Settings";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { hasElevatedAccess } from "@/app/utils/userRole";
 import AuthStatus from "./AuthStatus";
+import MapsPreferenceModal from "./MapsPreferenceModal";
 
 export default function Header() {
   const { data: session } = useSession();
   const hasElevated = hasElevatedAccess((session?.user as any)?.role);
+  const [mapsModalOpen, setMapsModalOpen] = useState(false);
 
   return (
     <AppBar position="static" sx={{ backgroundColor: "primary.main" }}>
@@ -61,8 +65,24 @@ export default function Header() {
             </Button>
           </Box>
         )}
+        <IconButton
+          onClick={() => setMapsModalOpen(true)}
+          sx={{
+            color: "white",
+            "&:hover": {
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+            },
+          }}
+          title="Maps service settings"
+        >
+          <SettingsIcon />
+        </IconButton>
         <AuthStatus />
       </Toolbar>
+      <MapsPreferenceModal
+        open={mapsModalOpen}
+        onClose={() => setMapsModalOpen(false)}
+      />
     </AppBar>
   );
 }

@@ -27,6 +27,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import NavigateButton from "./NavigateButton";
 
 const PlaygroundMap = dynamic(() => import("./PlaygroundMap"), {
   ssr: false,
@@ -166,6 +167,7 @@ export default function Playground({ playground }: PlaygroundProps) {
               name={playground.name}
             />
           </Box>
+          <NavigateButton lat={playground.latitude} lon={playground.longitude} sx={{ mt: 2 }} />
         </Box>
 
         <Divider />
