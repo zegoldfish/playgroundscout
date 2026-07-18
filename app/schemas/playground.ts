@@ -11,6 +11,7 @@ export const PlaygroundSchema = z.object({
   parkings: z.array(z.string()).optional(),
   average_rating: z.number().min(1).max(5).optional(),
   rating_count: z.number().int().min(0).optional(),
+  photos: z.array(z.string()).optional(),
   created_at: z.iso.datetime(),
   updated_at: z.iso.datetime(),
   location_hash: z.string().optional(),
