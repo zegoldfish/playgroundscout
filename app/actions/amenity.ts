@@ -12,7 +12,6 @@ import {
 import { authOptions } from "@/app/auth";
 import { hasElevatedAccess } from "@/app/utils/userRole";
 import { Amenity, CreateAmenity, UpdateAmenity } from "@/app/schemas/amenity";
-import { hasElevatedAccess } from "@/app/utils/userRole";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
