@@ -14,11 +14,19 @@ export default function Header() {
     <AppBar position="static" sx={{ backgroundColor: "primary.main" }}>
       <Toolbar sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
         <Typography
+          component={Link}
+          href="/"
           variant="h1"
           sx={{
             fontSize: "1.5rem",
             fontFamily: "var(--font-barriecito), cursive",
             fontWeight: 400,
+            textDecoration: "none",
+            color: "inherit",
+            cursor: "pointer",
+            "&:hover": {
+              opacity: 0.8,
+            },
           }}
         >
           🛝 Playground Scout
