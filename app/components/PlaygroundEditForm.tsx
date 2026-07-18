@@ -9,6 +9,7 @@ import { Playground } from "@/app/schemas/playground";
 import { Amenity } from "@/app/schemas/amenity";
 import { Parking } from "@/app/schemas/parking";
 import AmenityCreateInline from "@/app/components/AmenityCreateInline";
+import PhotoUpload from "@/app/components/PhotoUpload";
 import {
   Box,
   TextField,
@@ -46,6 +47,7 @@ export default function PlaygroundEditForm({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [photos, setPhotos] = useState<string[]>(playground.photos ?? []);
 
   useEffect(() => {
     const loadAmenities = async () => {
@@ -237,6 +239,18 @@ export default function PlaygroundEditForm({
               ))}
             </Stack>
           )}
+        </Box>
+
+        {/* Action Buttons */}
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>
+            Photos
+          </Typography>
+          <PhotoUpload
+            parkId={playground.park_id}
+            photoKeys={photos}
+            onPhotoKeysChanged={setPhotos}
+          />
         </Box>
 
         {/* Action Buttons */}

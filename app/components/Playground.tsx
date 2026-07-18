@@ -11,6 +11,7 @@ import { getUserRating } from "@/app/actions/rating";
 import { RatingRecord } from "@/app/schemas/rating";
 import RatingDisplay from "./RatingDisplay";
 import RatingForm from "./RatingForm";
+import PhotoGallery from "./PhotoGallery";
 import {
   Paper,
   Box,
@@ -165,6 +166,16 @@ export default function Playground({ playground }: PlaygroundProps) {
               name={playground.name}
             />
           </Box>
+        </Box>
+
+        <Divider />
+
+        {/* Photos Section */}
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+            Photos
+          </Typography>
+          <PhotoGallery photoKeys={playground.photos ?? []} />
         </Box>
 
         <Divider />
