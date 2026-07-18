@@ -285,6 +285,15 @@ export default function NearbyPlayground({ playground }: PlaygroundProps) {
           <Typography variant="body2" sx={{ color: "text.secondary", flex: 1 }}>
             Loading...
           </Typography>
+        ) : exists === true ? (
+          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+            <Typography variant="caption" sx={{ color: "success.main", fontWeight: 600 }}>
+              ✓ Saved to Scout
+            </Typography>
+            <Typography variant="caption" sx={{ color: "primary.main" }}>
+              View →
+            </Typography>
+          </Box>
         ) : !session?.user ? (
           <Button
             component={Link}
@@ -295,7 +304,7 @@ export default function NearbyPlayground({ playground }: PlaygroundProps) {
           >
             Sign in to save
           </Button>
-        ) : exists === false ? (
+        ) : (
           <Button
             onClick={handleSave}
             disabled={saving}
@@ -306,15 +315,6 @@ export default function NearbyPlayground({ playground }: PlaygroundProps) {
           >
             {saving ? "Adding..." : "Add to Scout"}
           </Button>
-        ) : (
-          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-            <Typography variant="caption" sx={{ color: "success.main", fontWeight: 600 }}>
-              ✓ Saved to Scout
-            </Typography>
-            <Typography variant="caption" sx={{ color: "primary.main" }}>
-              View →
-            </Typography>
-          </Box>
         )}
         <NavigateButton lat={playground.lat} lon={playground.lon} size="small" fullWidth />
       </CardActions>
